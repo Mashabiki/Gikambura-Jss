@@ -1103,7 +1103,7 @@ function showCustomAlert(message, color) {
 function extractFromCombinedTimetable() {
   const combined = document.querySelector("#combined-timetable table");
   if (!combined) {
-    return showAlert("Combined timetable not found!", "error");
+    return showAlert("timetable not found!", "error");
   }
 
   const rows = Array.from(combined.querySelectorAll("tbody tr"));
@@ -1175,17 +1175,20 @@ function extractFromCombinedTimetable() {
 function showAlert(message, type) {
   const alertBox = document.createElement("div");
   alertBox.textContent = message;
-  alertBox.style.padding = "5px";
-  alertBox.style.margin = "5px 0";
-  alertBox.style.borderRadius = "3px";
+  alertBox.style.padding = "10px 20px";
+  alertBox.style.borderRadius = "5px";
   alertBox.style.fontSize = "16px";
   alertBox.style.backgroundColor = "#d32f2f"; // Red background
-  alertBox.style.color = "white"; // White text color
-  alertBox.style.border = "1px solid #b71c1c"; // Dark red border
+  alertBox.style.color = "white"; // White text
+  alertBox.style.border = "1px solid #b71c1c";
+  alertBox.style.position = "fixed";
+  alertBox.style.top = "50%";
+  alertBox.style.left = "50%";
+  alertBox.style.transform = "translate(-50%, -50%)";
+  alertBox.style.zIndex = "1000"; // Make sure it's on top
 
   document.body.appendChild(alertBox);
 
-  // Remove the alert after 3 seconds
   setTimeout(() => {
     alertBox.remove();
   }, 3000);
