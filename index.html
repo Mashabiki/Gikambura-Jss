@@ -79,7 +79,7 @@
     }
     th {
       background-color: #f0f0f0;
-        }
+    }
     .hidden { display: none; }
 footer {
   position: fixed;
@@ -107,15 +107,17 @@ footer {
     transform: translateX(-100%);
   }
 }
- 
- 
+
+
+
+
   </style>
 </head>
 <body>
 <!-- Login Section -->
 <div id="login-page" style="text-align: center; padding: 50px; background-color: #a5d6a7; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 300px; margin: 50px auto; border: 3px solid #4caf50;">
   <div class="logo">
-    <img src="https://i.imgur.com/uWrz8rt.png" alt="School Logo" class="logo-img" style="width: 100px; margin-bottom: 20px;">
+    <img src="https://i.imgur.com/Mv4fLKU.png " alt="School Logo" class="logo-img" style="width: 250px; margin-bottom: 20px;">
   </div>
   
   <h1 style="color: #0056b3; font-size: 28px; font-weight: bold;">RASM Smart School Timetable Generator</h1>
@@ -138,7 +140,7 @@ footer {
   <!-- School Name and Logout Button -->
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="margin: 0; font-size: 24px; font-weight: bold; color: #2c3e50; display: flex; align-items: center;">
-      <img src="https://i.imgur.com/uWrz8rt.png" alt="School Logo" style="height: 36px; margin-right: 12px;">
+      <img src=" https://i.imgur.com/Mv4fLKU.png" alt="School Logo" style="height: 170px; margin-right: 12px;">
       NACHU  PRIMARY SCHOOL 
     </h2>
     <button onclick="logout()" style="background-color: #f44336; color: white; padding: 10px 20px; border-radius: 8px; font-size: 16px; border: none; cursor: pointer;">
@@ -593,7 +595,6 @@ function showCustomAlert(message, color) {
       if (!teacherSchedule[tid]) teacherSchedule[tid] = {};
       teacherSchedule[tid][`${day}-P${period}`] = true;
     }
-
 function generateSchedule(grade) {
   const schedule = {};
   const assign = assignments[grade];
@@ -658,9 +659,22 @@ function generateSchedule(grade) {
   const subjectPlacedCount = {};
   assignedSubjects.forEach(s => subjectPlacedCount[s] = 0);
 
+  // ? HARD-CODE PPI to Friday 8:00 if assigned
+  if (subjects.onePerWeek.includes('PPI') && assign['PPI']) {
+    const tid = assign['PPI'];
+    if (!schedule['Fri'][0] && isFree(tid, 'Fri', 1)) {
+      schedule['Fri'][0] = `PPI (T${tid})`;
+      occupy(tid, 'Fri', 1);
+      subjectPlacedCount['PPI'] = 1;
+    } else {
+      console.warn(`PPI could not be placed at Fri 8:00 for ${grade}`);
+    }
+  }
+
   // STEP 1: Place subjects based on frequency
   Object.entries(subjects).forEach(([frequency, subjectList]) => {
     subjectList.forEach(subj => {
+      if (subj === 'PPI') return; // Already handled
       const tid = assign[subj];
       const avoid = {};
       let count = 0;
@@ -684,6 +698,7 @@ function generateSchedule(grade) {
     for (let p of lessonSlots) {
       if (!schedule[day][p]) {
         for (let subj of assignedSubjects) {
+          if (subj === 'PPI' && schedule['Fri'][0]?.includes('PPI')) continue; // Only one PPI
           const tid = assign[subj];
           const maxCount = allSubjectsPerWeek[subj];
           const allowed = allowedPeriodsFor(subj);
@@ -709,6 +724,7 @@ function generateSchedule(grade) {
     for (let p of lessonSlots) {
       if (!schedule[day][p]) {
         for (let subj of assignedSubjects) {
+          if (subj === 'PPI' && schedule['Fri'][0]?.includes('PPI')) continue;
           const tid = assign[subj];
           const maxCount = allSubjectsPerWeek[subj];
           const allowed = allowedPeriodsFor(subj);
@@ -764,6 +780,7 @@ function generateSchedule(grade) {
   return schedule;
 }
 
+
 function generateCombinedTimetable() {
   const output = document.getElementById('combined-timetable');
   output.innerHTML = '';
@@ -814,7 +831,7 @@ function generateCombinedTimetable() {
 
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-xl font-bold text-white bg-red-600 px-4 py-2 rounded shadow-md">
-        <i class="fas fa-calendar-alt mr-2"></i>All Set! Your Master Timetable  Is Ready
+        <i class="fas fa-calendar-alt mr-2"></i> Generated Master Timetable Is Here
       </h3>
     </div>
 
@@ -878,31 +895,33 @@ function showCustomAlert(message, color) {
     alertBox.remove();
   }, 3000);
 }
-
-
 function printCombinedTimetable() {
   const term = document.getElementById("term-selector")?.value || "Term 1";
-  const logoURL = "https://i.imgur.com/uWrz8rt.png"; // Replace with your actual logo path
+  const logoURL = " https://i.imgur.com/Mv4fLKU.png";
 
   const headerHTML = `
     <div style="text-align:center; margin-bottom: 20px;">
       <img src="${logoURL}" alt="School Logo" style="height: 80px; margin-bottom: 10px;"><br>
-      <h2 style="margin: 0; font-family: Arial;">NACHU PRIMARY  SCHOOL</h2>
-      <h3 style="margin: 0; font-family: Arial;">MASTER TIMETABLE 2025</h3>
-      <p style="font-family: Arial;"><strong>TERM:</strong> ${term}</p>
+      <h2 style="margin: 0; font-family: Arial; color: black;">NACHU PRIMARY SCHOOL</h2>
+      <h3 style="margin: 0; font-family: Arial; color: black;">MASTER TIMETABLE 2025</h3>
+      <p style="font-family: Arial; color: black;"><strong>TERM:</strong> ${term}</p>
     </div>
   `;
 
-  // Get the timetable HTML
-  const timetable = document.getElementById('combined-timetable');
+  const footerHTML = `
+    <div style="margin-top: 30px; text-align: center; font-size: 12px; font-family: Arial; color: black;">
+      <hr style="margin: 20px auto; border: none; border-top: 1px solid #000; width: 80%;">
+      <strong>POWERED BY RASM TECHNOLOGIES - YOUR NUMBER ONE SCHOOL MANAGEMENT SOFTWARE</strong>
+    </div>
+  `;
 
-  // Clone and apply inline styles
+  const timetable = document.getElementById('combined-timetable');
   const clonedTable = timetable.cloneNode(true);
   clonedTable.setAttribute("style", "width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;");
 
   const ths = clonedTable.querySelectorAll("th");
   ths.forEach(th => {
-    th.setAttribute("style", "background-color: #4CAF50; color: white; border: 1px solid #333; padding: 6px; text-align: center;");
+    th.setAttribute("style", "background-color: #4CAF50; color: black; border: 1px solid #333; padding: 6px; text-align: center;");
   });
 
   const tds = clonedTable.querySelectorAll("td");
@@ -913,21 +932,21 @@ function printCombinedTimetable() {
     else if (text === "lunch") bg = "#ffeeba";
     else if (text === "games") bg = "#ffeeba";
 
-    td.setAttribute("style", `border: 1px solid #333; padding: 6px; text-align: center; font-family: Arial;${bg ? " background-color: " + bg + "; font-weight: bold;" : ""}`);
+    td.setAttribute("style", `color: black; border: 1px solid #333; padding: 6px; text-align: center; font-family: Arial;${bg ? " background-color: " + bg + "; font-weight: bold;" : ""}`);
   });
 
-  // Open new window for printing
   const printWindow = window.open('', '', 'height=900,width=1200');
   printWindow.document.write('<html><head><title>Print Timetable</title></head><body style="margin:0; padding:20px;">');
   printWindow.document.write(headerHTML);
   printWindow.document.write(clonedTable.outerHTML);
+  printWindow.document.write(footerHTML);
   printWindow.document.write('</body></html>');
-
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
   printWindow.close();
 }
+
 function toggleGradeSelector() {
     const container = document.getElementById("grade-container");
     container.style.display = (container.style.display === "none") ? "block" : "none";
@@ -1118,7 +1137,7 @@ function showCustomAlert(message, color) {
 function extractFromCombinedTimetable() {
   const combined = document.querySelector("#combined-timetable table");
   if (!combined) {
-    return showAlert("timetable not found!", "error");
+    return showAlert("Combined timetable not found!", "error");
   }
 
   const rows = Array.from(combined.querySelectorAll("tbody tr"));
@@ -1190,20 +1209,17 @@ function extractFromCombinedTimetable() {
 function showAlert(message, type) {
   const alertBox = document.createElement("div");
   alertBox.textContent = message;
-  alertBox.style.padding = "10px 20px";
-  alertBox.style.borderRadius = "5px";
+  alertBox.style.padding = "5px";
+  alertBox.style.margin = "5px 0";
+  alertBox.style.borderRadius = "3px";
   alertBox.style.fontSize = "16px";
   alertBox.style.backgroundColor = "#d32f2f"; // Red background
-  alertBox.style.color = "white"; // White text
-  alertBox.style.border = "1px solid #b71c1c";
-  alertBox.style.position = "fixed";
-  alertBox.style.top = "50%";
-  alertBox.style.left = "50%";
-  alertBox.style.transform = "translate(-50%, -50%)";
-  alertBox.style.zIndex = "1000"; // Make sure it's on top
+  alertBox.style.color = "white"; // White text color
+  alertBox.style.border = "1px solid #b71c1c"; // Dark red border
 
   document.body.appendChild(alertBox);
 
+  // Remove the alert after 3 seconds
   setTimeout(() => {
     alertBox.remove();
   }, 3000);
@@ -1227,20 +1243,26 @@ function buildTable(schedule, headers) {
   html += '</tbody></table></div>';
   return html;
 }
-
- function printThisTimetable(button) {
+function printThisTimetable(button) {
   const timetableBlock = button.closest(".extracted-block").cloneNode(true);
   timetableBlock.querySelector("button").remove();
 
-  const logoURL = "https://i.imgur.com/uWrz8rt.png";
+  const logoURL = "https://i.imgur.com/Mv4fLKU.png ";
   const headerText = timetableBlock.querySelector("h3")?.innerText || "Timetable";
   const isClass = headerText.toLowerCase().includes("class timetable");
 
   const headerHTML = `
     <div style="text-align: center; margin-bottom: 20px;">
       <img src="${logoURL}" style="height: 80px; margin-bottom: 10px;"><br>
-      <h2 style="margin: 0; font-size: 24px; font-family: Arial; font-weight: bold;">NACHU PRIMARY  SCHOOL</h2>
-      <h3 style="margin: 0; font-size: 18px; font-family: Arial; font-weight: bold;">${headerText}</h3>
+      <h2 style="margin: 0; font-size: 24px; font-family: Arial; font-weight: bold; color: black;">NACHU PRIMARY SCHOOL</h2>
+      <h3 style="margin: 0; font-size: 18px; font-family: Arial; font-weight: bold; color: black;">${headerText}</h3>
+    </div>
+  `;
+
+  const footerHTML = `
+    <div style="margin-top: 30px; text-align: center; font-size: 12px; font-family: Arial; color: black;">
+      <hr style="margin: 20px auto; border: none; border-top: 1px solid #000; width: 80%;">
+      <strong>POWERED BY RASM TECHNOLOGIES - YOUR NUMBER ONE SCHOOL MANAGEMENT SOFTWARE</strong>
     </div>
   `;
 
@@ -1250,9 +1272,10 @@ function buildTable(schedule, headers) {
   table.style.borderCollapse = "collapse";
   table.style.fontFamily = "Arial, sans-serif";
   table.style.fontSize = "12pt";
-  table.style.tableLayout = "fixed"; // Important to make it fit
+  table.style.tableLayout = "fixed";
   table.style.wordWrap = "break-word";
   table.style.overflowWrap = "break-word";
+  table.style.color = "black";
 
   table.querySelectorAll("th").forEach(th => {
     th.style.border = "2px solid black";
@@ -1260,6 +1283,7 @@ function buildTable(schedule, headers) {
     th.style.fontWeight = "bold";
     th.style.backgroundColor = "#f1f1f1";
     th.style.textAlign = "center";
+    th.style.color = "black";
   });
 
   table.querySelectorAll("td").forEach(td => {
@@ -1268,6 +1292,7 @@ function buildTable(schedule, headers) {
     td.style.textAlign = "center";
     td.style.wordWrap = "break-word";
     td.style.overflowWrap = "break-word";
+    td.style.color = "black";
   });
 
   const printCSS = `
@@ -1280,19 +1305,22 @@ function buildTable(schedule, headers) {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 20px;
+        color: black;
       }
       table {
         width: 100%;
         table-layout: fixed;
+        color: black;
       }
       th, td {
         word-wrap: break-word;
         overflow-wrap: break-word;
+        color: black;
       }
       ${isClass ? `
         .print-block {
           page-break-inside: avoid;
-          transform: scale(0.98); /* Subtle shrink to fit page */
+          transform: scale(0.98);
           transform-origin: top left;
         }
       ` : ''}
@@ -1301,13 +1329,14 @@ function buildTable(schedule, headers) {
 
   const printWindow = window.open('', '', 'width=1000,height=800');
   printWindow.document.write(`<html><head><title>Print Timetable</title>${printCSS}</head><body>`);
-  printWindow.document.write(`<div class="print-block">${headerHTML}${timetableBlock.innerHTML}</div>`);
+  printWindow.document.write(`<div class="print-block">${headerHTML}${timetableBlock.innerHTML}${footerHTML}</div>`);
   printWindow.document.write('</body></html>');
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
   printWindow.close();
 }
+
 </script>
  
 </body>
